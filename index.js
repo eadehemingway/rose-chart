@@ -1,23 +1,34 @@
 var arcData = [
-  { startAngle: 0, endAngle: 0.2, radius: 1.5 },
-  { startAngle: 0.2, endAngle: 0.4, radius: 6 },
-  { startAngle: 0.4, endAngle: 0.6, radius: 10 },
-  { startAngle: 0.6, endAngle: 0.8, radius: 4 },
-  { startAngle: 0.8, endAngle: 1, radius: 3 },
+  { amount: 7 },
+  { amount: 8 },
+  { amount: 9 },
+  { amount: 10 },
+  { amount: 11 },
+  { amount: 12 },
+  { amount: 13 },
+  { amount: 14 },
+  { amount: 15 },
 ];
 
 var full_circle_in_radians = 6.283185307179586;
-console.log("full_circle_in_radians:", full_circle_in_radians);
-
 var angle_of_wedge = full_circle_in_radians / arcData.length;
+
+var all_amounts = arcData.map((d) => d.amount);
+var radiusScale = d3.scaleLinear().domain(all_amounts).range([50, 70]);
+var arc_data_with_start_and_end = arcData.map((val, i) => {
+  var startAngle = i * angle_of_wedge;
+  var endAngle = startAngle + angle_of_wedge;
+  return {
+    radius: radiusScale(val.amount),
+    startAngle,
+    endAngle,
+  };
+});
 
 var angleScale = d3
   .scaleLinear()
   .range([Math.PI, 3 * Math.PI])
   .domain([0, arcData.length]);
-
-var all_radius = arcData.map((d) => d.radius);
-var radiusScale = d3.scaleLinear().domain(all_radius).range([10, 100]);
 
 var svg = d3.select("svg").append("g").attr("transform", "translate(300,300)");
 
@@ -26,13 +37,13 @@ var arcGenerator = d3
   .arc()
   .innerRadius(0)
   .outerRadius(function (d, i) {
-    return radiusScale(d.radius);
+    return d.radius;
   }); // needs to be dynamic
 
 // Create a path element and set its d attribute
 d3.select("g")
   .selectAll("path")
-  .data(arcData)
+  .data(arc_data_with_start_and_end)
   .join("path")
   .attr("d", arcGenerator)
   .attr("fill", "orange")
